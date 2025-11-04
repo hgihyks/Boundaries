@@ -454,7 +454,7 @@ const styles = {
   tooltip: { position: 'fixed', pointerEvents: 'none', background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', padding: '8px 10px', borderRadius: 6, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontFamily: 'Inter, system-ui, sans-serif' },
   tooltipTitle: { fontSize: 12, fontWeight: 600, color: '#111' },
   tooltipSub: { fontSize: 11, color: '#555' },
-  fab: { position: 'fixed', right: 16, bottom: 16, backgroundColor: '#111827', color: '#fff', border: 'none', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 },
+  fab: { position: 'fixed', left: 16, bottom: 16, backgroundColor: '#111827', color: '#fff', border: 'none', padding: '10px 14px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 },
   popup: { position: 'fixed', background: 'rgba(255,255,255,0.97)', border: '1px solid #ddd', padding: 12, borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.15)', maxWidth: 280 },
   popupText: { fontSize: 12, color: '#111', marginBottom: 8 },
   popupClose: { background: '#374151', color: '#fff', border: 'none', padding: '6px 8px', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }

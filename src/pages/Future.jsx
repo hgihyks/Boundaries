@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Future() {
   const svgRef = useRef(null);
@@ -9,8 +9,9 @@ export default function Future() {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [showMarkers, setShowMarkers] = useState(false);
   const [markerPopup, setMarkerPopup] = useState(null); // { left, top, text }
-  const [splitT] = useState(0.35); // where secondary splits into children (0..1)
-  const [childCount] = useState(40); // density of children
+  const [splitT] = useState(0.11); // where secondary splits into children (0..1)
+  const [childCount] = useState(100); // density of children
+  const [flipped, setFlipped] = useState(false); // flip primary/secondary probabilities
   const subjectName = 'Aakriti';
 
   useEffect(() => {
@@ -20,8 +21,8 @@ export default function Future() {
   }, []);
 
   // Probabilities and corresponding opacities (aligned with Past.jsx)
-  const pMain = 0.95;
-  const pAlt = 0.05;
+  const pMain = flipped ? 0.05 : 0.95;
+  const pAlt = flipped ? 0.95 : 0.05;
   const opMain = clamp(0.25 + pMain * 0.75, 0.25, 1);
   const opAlt = clamp(0.25 + pAlt * 0.75, 0.25, 1);
 
@@ -52,14 +53,14 @@ export default function Future() {
         </linearGradient>
       </defs>
 
-        <rect x={0} y={0} width={viewport.width} height={viewport.height} fill="#05092e" />
+        <rect x={0} y={0} width={viewport.width} height={viewport.height} fill="#a30e03" />
 
         {/* Main short dark branch */}
         <g
-          onMouseEnter={() => setHover({ key: 'main', label: 'Future #1. Probability: 0.95' })}
+          onMouseEnter={() => setHover({ key: 'main', label: `Future #1. Probability: ${pMain.toFixed(2)}` })}
           onMouseLeave={() => setHover(null)}
           tabIndex={0}
-          aria-label="Future #1. Probability: 0.95"
+          aria-label={`Future #1. Probability: ${pMain.toFixed(2)}`}
           role="group"
         >
           <path
@@ -192,9 +193,11 @@ export default function Future() {
       )}
 
       <div style={styles.controls}>
-        <Link to="/choice"><button style={styles.buttonSecondary}><span style={styles.buttonText}>Back</span></button></Link>
         <button style={styles.buttonPrimary} onClick={() => setShowMarkers((s) => !s)}>
           <span style={styles.buttonText}>{showMarkers ? 'Hide inflection points' : 'Show inflection points'}</span>
+        </button>
+        <button style={styles.buttonSecondary} onClick={() => setFlipped((f) => !f)} aria-label="Flip probabilities">
+          <span style={styles.buttonText}>Flip probabilities</span>
         </button>
       </div>
     </div>
@@ -255,13 +258,17 @@ function buildFutureModel(width, height, splitT, childCount, subjectName, pAlt) 
     // { ...pointOnPath(altPath, 0.05), text: 'Inflection on Future #2 @ 35%' },
     { ...pointOnPath(altPath, 0.1), text: `${subjectName} kills the intruder. Time: 3 minutes from now.` },
   ];
+  // Randomize number and position of inflection points per child branch (deterministic per child)
   children.forEach((c, i) => {
-    const t1 = 0.32;
-    const t2 = 0.68;
-    c.inflections = [
-      { ...pointOnPath(c.path, t1), text: `Inflection on Future #2.${i + 1} @ 32%` },
-      { ...pointOnPath(c.path, t2), text: `Inflection on Future #2.${i + 1} @ 68%` },
-    ];
+    const rng = mulberry32(hashCode(`future-child|${i}|${width}|${height}|${splitT}`));
+    // 0-3 points with a bias towards 1-2
+    const roll = rng();
+    const count = roll < 0.15 ? 0 : roll < 0.65 ? 1 : roll < 0.9 ? 2 : 3;
+    const minT = 0.10;
+    const maxT = 0.95;
+    const minGap = 0.10; // ensure visible spacing
+    const ts = sampleSeparatedTs(rng, count, minT, maxT, minGap);
+    c.inflections = ts.map((t) => ({ ...pointOnPath(c.path, t), text: `Inflection on Future #2.${i + 1} @ ${(t * 100).toFixed(0)}%` }));
   });
 
   return {
@@ -330,6 +337,41 @@ function pointOnPath(pts, t) {
 }
 function lerp(a, b, t) { return a + (b - a) * t; }
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+// ---- Random helpers (deterministic per child) ----
+function mulberry32(a) {
+  return function() {
+    let t = (a += 0x6D2B79F5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashCode(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function sampleSeparatedTs(rng, count, minT, maxT, minGap) {
+  if (count <= 0) return [];
+  const ts = [];
+  let attempts = 0;
+  const maxAttempts = 2000;
+  while (ts.length < count && attempts < maxAttempts) {
+    attempts++;
+    const t = clamp(minT + rng() * (maxT - minT), minT, maxT);
+    let ok = true;
+    for (let i = 0; i < ts.length; i++) {
+      if (Math.abs(ts[i] - t) < minGap) { ok = false; break; }
+    }
+    if (ok) ts.push(t);
+  }
+  ts.sort((a, b) => a - b);
+  return ts;
+}
 
 const styles = {
   container: { width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden', backgroundColor: '#0b0f2b' },
