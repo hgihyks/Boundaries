@@ -36,3 +36,26 @@
     transform: rotate(360deg);
   }
 }
+
+.choice-button {
+  background-color: black;
+  padding: 410px 50px;
+  border-radius: 10px;
+  border: 'none';
+  cursor: 'pointer';
+  transition: background-color 0.2s ease-in-out;
+}
+
+.choice-button:hover {
+  background-color: black; /* This is a medium gray, change if you want */
+}
+
+.button-text {
+  color: black;
+  font-weight: 600;
+  transition: color 2s ease-in-out;
+}
+
+.choice-button:hover .button-text {
+  color: #e5e7eb; /* A light gray for the text, change if you want */
+}
