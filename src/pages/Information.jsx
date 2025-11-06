@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import StaggeredText from '../components/StaggeredText';
 import { Link } from 'react-router-dom';
+import { createRbcModel, createWbcModel, createPltModel, mockDailyInputs, stepRbc, stepWbc, stepPlt } from '../utils/rbcModel';
 
 export default function Information() {
   const firstName = 'Aakriti';
@@ -39,25 +40,72 @@ export default function Information() {
       ['Alpha-Theta Synchrony (Rest State)', 'Above normal'],
       ['Gamma Spikes (during focus tasks)', 'Strong but irregular'],
     ],
-    []
+    [internetBankingUsername]
   );
 
   // Live counters (1/sec)
-  const [rbc, setRbc] = useState('48057##');
-  const [wbc, setWbc] = useState('630#');
-  const [platelets, setPlatelets] = useState('2510##');
-  const rbcTemplate = useRef('48057##');
-  const wbcTemplate = useRef('630#');
-  const plateletsTemplate = useRef('2510##');
+  const [rbc, setRbc] = useState('');
+  const [wbc, setWbc] = useState('');
+  const [platelets, setPlatelets] = useState('');
   const [genomeSec, setGenomeSec] = useState(2); // last seconds digit in "Live Genome Age"
+  const modelRef = useRef(null);
+  const wbcModelRef = useRef(null);
+  const pltModelRef = useRef(null);
+  const tDaysRef = useRef(0);
+
+  const formatRbc = (rbcPerUl) => {
+    const n = Math.max(0, Math.round(Number(rbcPerUl) || 0));
+    return n.toString();
+  };
+
+  const formatInt = (value) => {
+    const n = Math.max(0, Math.round(Number(value) || 0));
+    return n.toString();
+  };
 
   useEffect(() => {
+    // initialize model
+    const model = createRbcModel();
+    modelRef.current = { params: model.params, state: model.state };
+    const wModel = createWbcModel();
+    wbcModelRef.current = { params: wModel.params, state: wModel.state };
+    const pModel = createPltModel();
+    pltModelRef.current = { params: pModel.params, state: pModel.state };
+
+    // set initial display using current state without advancing time
+    const initRes = stepRbc(modelRef.current.state, tDaysRef.current, (t) => mockDailyInputs(t), modelRef.current.params, 0);
+    setRbc(formatRbc(initRes.RBC_per_uL));
+    const initW = stepWbc(wbcModelRef.current.state, tDaysRef.current, (t) => mockDailyInputs(t), wbcModelRef.current.params, 0);
+    setWbc(formatInt(initW.WBC_per_uL));
+    const initP = stepPlt(pltModelRef.current.state, tDaysRef.current, (t) => mockDailyInputs(t), pltModelRef.current.params, 0);
+    setPlatelets(formatInt(initP.PLT_per_uL));
+
+    const dtDays = 3 / 86400; // 3 s in days (user-adjusted)
     const id = setInterval(() => {
-      // replace hashes with random digits against the templates each tick
-      const randDigit = () => Math.floor(Math.random() * 10).toString();
-      setRbc(rbcTemplate.current.replace(/#/g, () => randDigit()));
-      setWbc(wbcTemplate.current.replace(/#/g, () => randDigit()));
-      setPlatelets(plateletsTemplate.current.replace(/#/g, () => randDigit()));
+      // RBC via model
+      if (modelRef.current) {
+        const { params, state } = modelRef.current;
+        const res = stepRbc(state, tDaysRef.current, (t) => mockDailyInputs(t), params, dtDays);
+        modelRef.current.state = { N: res.N };
+        tDaysRef.current += dtDays;
+        setRbc(formatRbc(res.RBC_per_uL));
+      }
+
+      // WBC via model
+      if (wbcModelRef.current) {
+        const { params, state } = wbcModelRef.current;
+        const resW = stepWbc(state, tDaysRef.current, (t) => mockDailyInputs(t), params, dtDays);
+        wbcModelRef.current.state = { Nw: resW.Nw, Rw: resW.Rw };
+        setWbc(formatInt(resW.WBC_per_uL));
+      }
+
+      // Platelets via model
+      if (pltModelRef.current) {
+        const { params, state } = pltModelRef.current;
+        const resP = stepPlt(state, tDaysRef.current, (t) => mockDailyInputs(t), params, dtDays);
+        pltModelRef.current.state = { Np: resP.Np, Sp: resP.Sp, history: resP.history };
+        setPlatelets(formatInt(resP.PLT_per_uL));
+      }
     }, 300);
     return () => clearInterval(id);
   }, []);
