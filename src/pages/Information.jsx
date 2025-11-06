@@ -3,9 +3,12 @@ import StaggeredText from '../components/StaggeredText';
 import { Link } from 'react-router-dom';
 
 export default function Information() {
+  const firstName = 'Aakriti';
+  const lastName = 'Saparoo';
+  const internetBankingUsername = `${firstName.toLowerCase()}.sbi2020`;
   const staticRows = useMemo(
     () => [
-      ['Name', 'Aakriti Saparoo'],
+      ['Name', `${firstName} ${lastName}`],
       ['DOB', '21/02/2030'],
       ['Time of Birth', '04:17 AM'],
       ['Place of Birth', '17.6868° N, 83.2185° E'],
@@ -22,12 +25,12 @@ export default function Information() {
       ['Passport', 'M2083761'],
       ['Employee ID', '1289'],
       ['Bank Name', 'State Bank of India (SBI)'],
-      ['Account Holder', 'Mahija Mandalika'],
+      ['Account Holder', `${firstName} ${lastName}`],
       ['Account Number', '30569248123'],
       ['IFSC Code', 'SBIN0001445'],
-      ['Internet Banking Username', 'mahija.sbi1995'],
+      ['Internet Banking Username', internetBankingUsername],
       ['Internet Banking Password', 'fresh-apple-pies'],
-      ['UPI ID', 'mahija@sbi'],
+      ['UPI ID', `${firstName.toLowerCase()}@sbi`],
       ['UPI PIN', '4687'],
       ['Body Fat Percentage', '18.2%'],
       ['Muscle Mass Percentage', '41.6%'],
