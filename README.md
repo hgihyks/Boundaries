@@ -1,70 +1,28 @@
-# Getting Started with Create React App
+## Run the app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+1. Install deps: `npm install`
+2. Start dev server: `npm start`
+3. Open `http://localhost:3000`
 
-## Available Scripts
+## Live biometrics (RBC, WBC, Platelets)
 
-In the project directory, you can run:
+Implementation lives in `src/utils/rbcModel.js` and is wired in `src/pages/Information.jsx`.
+- Update cadence: every 300 ms with integration step `dtDays = 3/86400` days.
+- Inputs are mocked via `mockDailyInputs(tDays)` and include hydration, training load, illness, iron, stress, catecholamines, circadian phase, and menstrual-related signals.
 
-### `npm start`
+### RBC
+- State: `N` (cells); Output: `RBC_per_uL = N / BV`.
+- Production: `P = P0 * qFe * (1 + α * tanh(S))` with delayed inputs (τ = 3 d).
+- Update: `N[t+1] = N[t] + (P - λ*N[t] - L_men) * dt` where `L_men = M * (N/BV)`.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### WBC
+- State: `Nw` (circulating), `Rw` (reservoir); Output: `WBC_per_uL = (Nw/BV) * q_circ`.
+- Production: `Pw = Pw0 * (1 + β_w * tanh(aX*X_{t-τ} + aI*I_{t-τ}))`, τ = 1 d.
+- Exchange: `rel = k_rel*(1 + γ_C*C)*Rw`, `ret = k_ret*Nw`.
+- Updates: `Rw' = Pw - rel + ret`, `Nw' = rel - ret - λ_w*Nw`.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### Platelets
+- State: `Np` (circulating), `Sp` (sequestered); Output: `PLT_per_uL = Np / BV`.
+- Production: `Pp = Pp0*(1 + α_p*tanh((κ_p/(1+ρ*Mp/Np_*)) - 1) + η_I*I_{t-τ})`, τ = 3 d.
+- Exchange/consumption: `release = s_out*(1+γ_C*C)*Sp`, `seques = s_in*Np`, `consumption = θ_B*B*Np + θ_D*D*Np`.
+- Updates: `Sp' = seques - release`, `Np' = Pp + release - seques - λ_p*Np - consumption`.
