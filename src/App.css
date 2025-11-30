@@ -38,24 +38,26 @@
 }
 
 .choice-button {
-  background-color: black;
+  background-color: white;
   padding: 410px 50px;
-  border-radius: 10px;
-  border: 'none';
+  border-radius: 5px; 
+  border-color: white;
+  border: none;
   cursor: 'pointer';
-  transition: background-color 0.2s ease-in-out;
+  /* /* transition: background-color 0.2s ease-in-out; */
 }
 
 .choice-button:hover {
   background-color: black; /* This is a medium gray, change if you want */
+  border-color: black;
 }
 
 .button-text {
-  color: black;
+  color: rgb(221, 224, 217);
   font-weight: 600;
   transition: color 2s ease-in-out;
 }
 
 .choice-button:hover .button-text {
-  color: #e5e7eb; /* A light gray for the text, change if you want */
+  color: white; /* A light gray for the text, change if you want */
 }
