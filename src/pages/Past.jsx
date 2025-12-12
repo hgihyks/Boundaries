@@ -15,9 +15,9 @@ export default function Past() {
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [hover, setHover] = useState(null); // {id, name, p}
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [showMarkers, setShowMarkers] = useState(() => loadState().showMarkers ?? false);
-  const [zoom, setZoom] = useState(() => loadState().zoom ?? { k: 1, x: 0, y: 0 });
-  const seed = useMemo(() => loadState().seed ?? String(Math.floor(Math.random() * 1e9)), []);
+  const [showMarkers, setShowMarkers] = useState(false);
+  const [zoom, setZoom] = useState({ k: 1, x: 0, y: 0 });
+  const seed = useMemo(() => String(Math.floor(Math.random() * 1e9)), []);
   const subjectName = 'Aakriti';
 
   // Resize handling
@@ -27,10 +27,7 @@ export default function Past() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Persist basic state on unmount
-  useEffect(() => {
-    saveState({ seed, showMarkers, zoom });
-  }, [seed, showMarkers, zoom]);
+
 
   // Procedurally generate branches
   const tree = useMemo(() => generateTree({ seed, width: viewport.width, height: viewport.height, subjectName }), [seed, viewport, subjectName]);
@@ -308,7 +305,7 @@ function generateTree({ seed, width, height, subjectName }) {
 
     const targetY = clamp(centerY + driftSign * amplitude * (0.15 + rng() * 0.6), centerY - amplitude, centerY + amplitude);
 
-    let points = [ startOnPrimary ];
+    let points = [startOnPrimary];
     let currentY = startOnPrimary.y;
     for (let l = startLayer + 1; l < layers; l++) {
       const x = xs[l];
@@ -430,7 +427,7 @@ function pointOnPath(pts, t) {
 
 // Simple deterministic RNG from seed
 function mulberry32(a) {
-  return function() {
+  return function () {
     let t = (a += 0x6D2B79F5);
     t = Math.imul(t ^ (t >>> 15), t | 1);
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
@@ -460,14 +457,4 @@ const styles = {
   popupClose: { background: '#374151', color: '#fff', border: 'none', padding: '6px 8px', borderRadius: 6, cursor: 'pointer', fontWeight: 600 }
 };
 
-function loadState() {
-  try {
-    const raw = sessionStorage.getItem('pastState');
-    return raw ? JSON.parse(raw) : {};
-  } catch { return {}; }
-}
-function saveState(obj) {
-  try {
-    sessionStorage.setItem('pastState', JSON.stringify(obj));
-  } catch {}
-}
+

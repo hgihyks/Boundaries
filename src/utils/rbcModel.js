@@ -37,7 +37,7 @@ export function mockDailyInputs(tDays) {
   const cycleDay = ((day % 28) + 28) % 28;
 
   // Hydration ~ baseline 0 with small oscillations (as fraction of BV)
-  const H2O = 0.01 * (1 + 0.5 * Math.sin(TWO_PI * (day % 1))) ; // ~1% +/- 0.5%
+  const H2O = 0.01 * (1 + 0.5 * Math.sin(TWO_PI * (day % 1))); // ~1% +/- 0.5%
 
   // Exercise training load TL in [0,1]
   const TL = 0.4 + 0.3 * Math.max(0, Math.sin(TWO_PI * (day / 7))); // weekly rhythm
@@ -114,7 +114,7 @@ export function stepRbc(state, tDays, inputs, params, dtDays) {
   const Nnext = Math.max(0, N + dN);
   const RBC_per_uL = Nnext / BV;
 
-  return { N: Nnext, RBC_per_uL };
+  return { N: Nnext, RBC_per_uL, RBC_total: Nnext };
 }
 
 const rbcApi = {
@@ -183,7 +183,7 @@ export function stepWbc(state, tDays, inputs, params, dtDays) {
   const q_circ = 1 + params.A_c * Math.sin(phi);
   const WBC_per_uL = (Nw_next / BV) * q_circ;
 
-  return { Nw: Nw_next, Rw: Rw_next, WBC_per_uL };
+  return { Nw: Nw_next, Rw: Rw_next, WBC_per_uL, WBC_total: Nw_next + Rw_next };
 }
 
 // ========================= PLATELET MODEL =========================
@@ -265,7 +265,8 @@ export function stepPlt(state, tDays, inputs, params, dtDays) {
   // Keep history bounded
   if (nextHistory.length > 1000) nextHistory.shift();
 
-  return { Np: Np_next, Sp: Sp_next, history: nextHistory, PLT_per_uL };
+  const PLT_total = Np_next + Sp_next;
+  return { Np: Np_next, Sp: Sp_next, history: nextHistory, PLT_per_uL, PLT_total };
 }
 
 

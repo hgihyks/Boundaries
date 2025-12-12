@@ -7,7 +7,7 @@
 ## Live biometrics (RBC, WBC, Platelets)
 
 Implementation lives in `src/utils/rbcModel.js` and is wired in `src/pages/Information.jsx`.
-- Update cadence: every 300 ms with integration step `dtDays = 3/86400` days.
+- Update cadence: every 3 ms with integration step `dtDays = 0.3/86400` days.
 - Inputs are mocked via `mockDailyInputs(tDays)` and include hydration, training load, illness, iron, stress, catecholamines, circadian phase, and menstrual-related signals.
 
 ### RBC

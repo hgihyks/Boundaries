@@ -214,7 +214,7 @@ export default function Loading() {
               {isButtonLoading ? (
                 <span style={styles.spinner} aria-label="Loading" />
               ) : (
-                <span style={styles.buttonText}>LifeLine</span>
+                <span style={styles.buttonText}>Observe & Create</span>
               )}
             </button>
           )}
