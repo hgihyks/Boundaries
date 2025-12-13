@@ -2,15 +2,15 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const ENABLE_CAMERA_INTRO = true;
+const ENABLE_CAMERA_INTRO = false;
 
 export default function Loading() {
   const lines = useMemo(
     () => [
+      'Generating Trajectories',
       'Accessing Government Repositories',
       'Accessing Private Repositories',
-      'Calculating Genetic History',
-      'Initiating 128000000 qubits',
+      'Aligning Paths',
     ],
     []
   );
@@ -18,6 +18,36 @@ export default function Loading() {
   // Original State
   const [visibleCount, setVisibleCount] = useState(0);
   const [isButtonLoading, setIsButtonLoading] = useState(false);
+  const [qubitCount, setQubitCount] = useState(0);
+  const [hasStartedCounting, setHasStartedCounting] = useState(false);
+
+  // Counter Effect
+  useEffect(() => {
+    // Start counting when at least one line is visible (which is "Accessing Government Repositories")
+    if (visibleCount >= 1 && !hasStartedCounting) {
+      setHasStartedCounting(true);
+      const target = 128000001;
+      const duration = 8000; // 4 seconds to reach target
+      const startTime = performance.now();
+
+      const animate = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease out cubic
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        const current = Math.floor(ease * target);
+        setQubitCount(current);
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      };
+
+      requestAnimationFrame(animate);
+    }
+  }, [visibleCount, hasStartedCounting]);
 
   // Camera State
   const [cameraActive, setCameraActive] = useState(ENABLE_CAMERA_INTRO);
@@ -195,6 +225,11 @@ export default function Loading() {
         </div>
       ) : (
         <>
+          {visibleCount >= 1 && (
+            <div style={styles.qubitCounter}>
+              Initiated {qubitCount.toLocaleString()} Qubits
+            </div>
+          )}
           <div style={styles.listContainer}>
             {lines.slice(0, visibleCount).map((text, idx) => (
               <div key={idx} style={styles.line}>
@@ -214,7 +249,7 @@ export default function Loading() {
               {isButtonLoading ? (
                 <span style={styles.spinner} aria-label="Loading" />
               ) : (
-                <span style={styles.buttonText}>Observe & Create</span>
+                <span style={styles.buttonText}>Observe</span>
               )}
             </button>
           )}
@@ -280,6 +315,18 @@ const styles = {
     paddingBottom: '16px',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  qubitCounter: {
+    position: 'absolute',
+    top: '15vh',
+    width: '100%',
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: '24px',
+    fontFamily: 'monospace',
+    textAlign: 'center',
+    animation: 'fadeInUp 0.5s ease-out forwards',
   },
   line: {
     fontSize: '18px',

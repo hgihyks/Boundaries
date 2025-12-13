@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import StaggeredText from '../components/StaggeredText';
+import FocusBlurText from '../components/FocusBlurText';
 import { Link } from 'react-router-dom';
 import { createRbcModel, createWbcModel, createPltModel, mockDailyInputs, stepRbc, stepWbc, stepPlt } from '../utils/rbcModel';
 
@@ -136,10 +136,10 @@ export default function Information() {
           {[...staticRows, ...liveRows].map(([label, value], idx) => (
             <div style={{ ...styles.row, marginBottom: `${20 + idx * 8}px` }} key={idx}>
               <div style={styles.labelCol}>
-                <StaggeredText as="span" style={styles.label} text={label} />
+                <FocusBlurText as="span" style={styles.label} text={label} />
               </div>
               <div style={styles.valueCol}>
-                <StaggeredText as="span" style={styles.value} text={String(value)} />
+                <FocusBlurText as="span" style={styles.value} text={String(value)} />
               </div>
             </div>
           ))}
@@ -162,10 +162,10 @@ const styles = {
     justifyContent: 'center',
   },
   heading: {
-    fontSize: '74px',
+    fontSize: '94px',
     fontWeight: '900',
     color: '#111827',
-    marginBottom: '160px',
+    marginBottom: '200px',
     marginTop: '40px',
     textAlign: 'center',
   },
