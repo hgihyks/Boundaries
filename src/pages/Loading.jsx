@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-const ENABLE_CAMERA_INTRO = false;
+const ENABLE_CAMERA_INTRO = true;
 
 export default function Loading() {
   const lines = useMemo(
